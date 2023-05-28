@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
-const pinRoutes = require('./routes/pinRoutes')
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+const pinRoutes = require('./routes/pinRoutes');
 
 // Init app
 const app = express();

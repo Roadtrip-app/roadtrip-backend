@@ -16,21 +16,15 @@ router.get('/', async (req, res) => {
 // Post a new pin
 router.post('/create', async (req, res) => {
 	try {
-		const pin = new Pin({
-			name: req.body.name,
-			description: req.body.description,
-			author: req.body.author,
-			category: req.body.category,
-			tags: req.body.tags,
-			images: req.body.images,
-			location: req.body.location
-		});
+		const pin = new Pin(req.body);
 	
 		await pin.save();
-		res.redirect('/');
+		res.redirect('/pins');
 	} catch (err) {
 		console.log(err);
-		res.status(400)
+		res.status(400);
 	}
 	
 })
+
+module.exports = router;
