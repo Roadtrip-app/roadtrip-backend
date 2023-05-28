@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+
+// Schema for location pins
 const pinSchema = new Schema({
 	name: {
 		type: String,
