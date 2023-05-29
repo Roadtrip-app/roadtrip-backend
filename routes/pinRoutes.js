@@ -19,7 +19,7 @@ router.post('/create', async (req, res) => {
 		const pin = new Pin(req.body);
 	
 		await pin.save();
-		res.redirect('/pins');
+		res.send(pin);
 	} catch (err) {
 		console.log(err);
 		res.status(400);
