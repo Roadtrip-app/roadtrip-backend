@@ -18,9 +18,10 @@ app.use('/pins', pinRoutes);
 
 // Connect to production db if not testing
 if (process.env.NODE_ENV !== 'test') {
+	const port = process.env.PORT;
 	connectDB(process.env.MONGO_URI)
 	  .then(() => {
-		app.listen(process.env.PORT, () => {
+		app.listen(port, () => {
 		  console.log(`Server listening on port ${port}`);
 		});
 	  })
