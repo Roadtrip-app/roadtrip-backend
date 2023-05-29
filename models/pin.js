@@ -9,7 +9,7 @@ const pinSchema = new Schema({
 	},
 	description: {
 		type: String,
-		required: true
+		default: ""
 	},
 	author: {
 		username: {
@@ -26,7 +26,10 @@ const pinSchema = new Schema({
 		required: true,
 		default: "general"
 	},
-	tags: [String],
+	tags: {
+		type: [String],
+		default: []
+	},
 	location: {
 		country: {
 			type: String,
@@ -58,7 +61,10 @@ const pinSchema = new Schema({
 			type: String,
 			required: true
 		},
-		main_image_urls: [String]
+		main_image_urls: {
+			type: [String],
+			default: []
+		}
 	}
 
 	}, {timestamps: true})
