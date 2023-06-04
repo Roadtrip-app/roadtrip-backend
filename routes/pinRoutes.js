@@ -8,9 +8,8 @@ router.get('/', async (req, res) => {
 		const pins = await Pin.find();
 		res.send(pins);
 	} catch (err) {
-		console.log(err)
+		console.log(err);
 	}
-	
 })
 
 // Post a new pin
@@ -27,4 +26,28 @@ router.post('/create', async (req, res) => {
 	
 })
 
+// Update a pin
+router.patch('/:id', async (req, res) => {
+	// Check if user is authorized first
+	try {
+		const updated = await Pin.findByIdAndUpdate(req.params.id, req.body, {new: true})
+		res.send(updated)
+	} catch (err) {
+		console.log(err);
+		res.send("error occured").status(400);
+	}	
+})
+
+// Delete a pin
+router.delete('/:id', (req, res) => {
+	// Check if user is authorized first
+	try {
+	 	Pin.findOneAndRemove({_id: req.params.id});
+		res.send("ok")
+	} catch (err) {
+		console.log(err);
+		res.send("error occured").status(400);
+	}
+	
+})
 module.exports = router;
