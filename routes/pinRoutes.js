@@ -30,8 +30,8 @@ router.post('/create', async (req, res) => {
 router.patch('/:id', async (req, res) => {
 	// Check if user is authorized first
 	try {
-		const updated = await Pin.findByIdAndUpdate(req.params.id, req.body, {new: true})
-		res.send(updated)
+		const updated = await Pin.findByIdAndUpdate(req.params.id, req.body, {new: true});
+		res.send(updated);
 	} catch (err) {
 		console.log(err);
 		res.send("error occured").status(400);
