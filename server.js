@@ -30,4 +30,5 @@ if (process.env.NODE_ENV !== 'test') {
 	  });
 }
 
+// Export server
 module.exports = app;
