@@ -4,13 +4,17 @@ pipeline {
         stage('Dependencies') {
             steps {
                 echo 'Installing..'
-			sh 'npm install'
+		nodejs('NodeJS') {
+			npm install
+		}
             }
         }
         stage('Test') {
             steps {
                 echo 'Testing..'
-			sh 'npm test'
+		nodejs('NodeJS') {
+			npm test
+		}
             }
         }
     }
