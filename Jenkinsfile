@@ -12,8 +12,11 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
-		sh 'npm test'
+		        sh 'npm test'
             }
+        }
+        stage ("Extract test results") {
+            cobertura coberturaReportFile: 'output/coverage/cobertura-coverage.xml'
         }
     }
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --runInBand",
+    "test": "jest --coverage --coverageDirectory=output/coverage",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
@@ -31,5 +31,11 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.22",
     "supertest": "^6.3.3"
+  },
+  "jest": {
+    "coverageReporters": [
+      "text",
+      "cobertura"
+    ]
   }
 }
