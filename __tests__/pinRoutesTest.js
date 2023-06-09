@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const request = require('supertest');
 const app = require('../server');
 const { connectDB } = require('../db');
-const {testPin} = require('../assets/testObjects');
+const {testPin} = require('../assets/objects/testObjects');
 describe('Test pin routes', () => {
   let mongoServer;
   // Start mock DB
