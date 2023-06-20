@@ -5,9 +5,7 @@ const EARTH_RADIUS = 6378.137;
 
 // Calculate distance between two latitude/longitude coordinates
 // Taken from https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
-export const dist = (point1, point2) => {
-	// Code taken from 
-	// by user Salvador Dali
+const dist = (point1, point2) => {
 	const [lat1, lon1] = pointToRadians(point1);
 	const [lat2, lon2] = pointToRadians(point2);
 	
@@ -22,7 +20,7 @@ export const dist = (point1, point2) => {
 
 // Generate latitude and longitude that is in between point1 and point2 and is a certain distance away from point1
 // Taken from https://stackoverflow.com/questions/7222382/get-lat-long-given-current-point-distance-and-bearing
-export const calcPoint = (point1, point2, distance) => {
+const calcPoint = (point1, point2, distance) => {
 	const [lat1, lon1] = pointToRadians(point1);
 	const [lat2, lon2] = pointToRadians(point2);
 	// Find the angle towards point2
@@ -48,5 +46,7 @@ const calcBearing = (lat1, lon1, lat2, lon2) => {
 }
 
 const pointToRadians = (point) => {
-	return [point[0] * toRadians, point[1] * toRadians]
+	return [point.lat * toRadians, point.lng * toRadians]
 }
+
+module.exports = calcPoint
