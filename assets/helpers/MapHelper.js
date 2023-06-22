@@ -15,7 +15,7 @@ const dist = (point1, point2) => {
 
 	const km = 2 * EARTH_RADIUS * Math.asin(Math.sqrt(a));
 	const mi = km * 0.62137
-  	return [km, mi]
+  	return km * 1000
 }
 
 // Generate latitude and longitude that is in between point1 and point2 and is a certain distance away from point1
@@ -24,29 +24,35 @@ const calcPoint = (point1, point2, distance) => {
 	const [lat1, lon1] = pointToRadians(point1);
 	const [lat2, lon2] = pointToRadians(point2);
 	// Find the angle towards point2
-	const bearing = calcBearing(lat1, lon1, lat2, lon2) * toRadians;
+	const bearing = calcBearing(lat1, lon1, lat2, lon2);
 	// Compensate for earth's radius
 	distance /= EARTH_RADIUS;
 
 	// Calculate new lat/lon
 	const latInRad = (Math.asin(sin(lat1) * cos(distance) + cos(lat1) * sin(distance)* cos(bearing)));
-	const lonInRad = (lat1 + Math.atan2(sin(bearing) * sin(distance) * cos(lat1), cos(distance) - sin(lat1) * sin(latInRad)));
+	const lonInRad = (lon1 + Math.atan2(sin(bearing) * sin(distance) * cos(lat1), cos(distance) - sin(lat1) * sin(latInRad)));
 
 	return [latInRad / toRadians, lonInRad / toRadians]
 }
 
 // Calculate the bearing from one set of coordinates to the next
 // Taken from https://stackoverflow.com/questions/46590154/calculate-bearing-between-2-points-with-javascript
-const calcBearing = (lat1, lon1, lat2, lon2) => {
-	y = sin((lon2 - lon1)) * cos(lat2);
-	x = cos(lat1) * sin(lat2) -
-		  sin(lat1) * cos(lat2) * cos((lon2 - lon1));
-	bearing = Math.atan2(y, x);
-	return bearing
+const calcBearing = (startLat, startLng, destLat, destLng) => {
+	startLat *= toRadians;
+	startLng *= toRadians;
+	destLat *= toRadians;
+	destLng *= toRadians;
+
+	y = Math.sin(destLng - startLng) * Math.cos(destLat);
+	x = Math.cos(startLat) * Math.sin(destLat) -
+		Math.sin(startLat) * Math.cos(destLat) * Math.cos(destLng - startLng);
+	brng = Math.atan2(y, x);
+	brngDeg = ((brng / toRadians) + 360) % 360
+	return brng
 }
 
 const pointToRadians = (point) => {
 	return [point.lat * toRadians, point.lng * toRadians]
 }
 
-module.exports = calcPoint
+module.exports = {dist, calcPoint}
