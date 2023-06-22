@@ -17,16 +17,15 @@ function generateROIs(apiResponse, numStops) {
 	let totalDistance = 0;
 	route = apiResponse.routes[0]
 	route.legs.forEach(leg => {
-		console.log(`current leg distance: ${leg.distance.value}`)
 		totalDistance += leg.distance.value
 	})
-	console.log(`total dist: ${totalDistance}`)
 	// Add ROI to start 
 	let ROIs = []
 	ROIs.push([route.legs[0].start_location.lat, route.legs[0].start_location.lng]);
 	// Divide route by number of stops requested, subtract 1 for the start ROI
 	const distBetweenROI = totalDistance / (numStops - 1); 
-	console.log(`dist between: ${distBetweenROI}`)
+	let distances = {idealDistance: distBetweenROI, actualDistances: []};
+
 	// Travel through route
 	let currDist = 0;
 	route.legs.forEach(leg => {
@@ -35,36 +34,30 @@ function generateROIs(apiResponse, numStops) {
 		} else {
 			// Go through trip steps until we're far enough from previous ROI to place another
 			leg.steps.forEach(step =>  {
-				console.log(step.start_location)
 				currDist += step.distance.value
-				console.log(currDist)
 				while(currDist >= distBetweenROI) {
 					// Keep adding ROIs in between current and next point if its far enough to fit multiple
-					console.log(currDist / 1000)
 					currDist -= distBetweenROI;
 					nextROI = calcPoint(step.start_location, step.end_location, (step.distance.value - currDist) / 1000);
+
+					// Calculate the distance from the last ROI to the one we just calculated
+					// This is done by taking the distance from the previous ROI to the step.start_location (currDist - step.distance.value + distBetweenROI)
+					// and adding it to the distance from the step.start_location to the nextROI
+					const leftoverDistFromPrevROI = currDist - step.distance.value + distBetweenROI;
+					const resultDist = leftoverDistFromPrevROI + dist(step.start_location, {lat: nextROI[0], lng: nextROI[1]});
+
+					// Keep track of distances between ROIs as well as ROI coordinates
+					distances.actualDistances.push(resultDist)
 					ROIs.push(nextROI);
 				}
 			});
 		}
 	})
 
-	// while(currentNode.next) {
-	// 	// Find distance to the next route node
-	// 	const distances = dist(currentNode, currentNode.next)
-	// 	const distanceToNext = isInKm ? distances[0] : distances[1];
-	// 	// Add it to the distance from the previous ROI to current node
-	// 	currDist += distanceToNext
-	// 	// While the distance traveled is greater than the set distance
-	// 	while(currDist >= distBetweenROI) {
-	// 		// Keep adding ROIs in between current and next point
-	// 		currDist -= distBetweenROI;
-	// 		nextROI = calcPoint(currentNode, currentNode.next, distanceToNext - currDist);
-	// 		ROIs.append(nextROI);
-	// 	}
-	// 	// Continue to next point
-	// 	currentNode = currentNode.next
-	// } 
+	if(ROIs.length < numStops) {
+		ROIs.push([route.legs[route.legs.length - 1].end_location.lat, route.legs[route.legs.length - 1].end_location.lng])
+	}
+
 	return ROIs
 }
 
