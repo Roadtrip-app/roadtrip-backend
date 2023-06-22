@@ -13,21 +13,20 @@ function findPOIs(filter, route, numStops = null) {
 	})
 }
 
-function generateROIs(route, numStops) {
-	let totalDistance;
+function generateROIs(apiResponse, numStops) {
+	let totalDistance = 0;
+	route = apiResponse.routes[0]
 	route.legs.forEach(leg => {
+		console.log(`current leg distance: ${leg.distance.value}`)
 		totalDistance += leg.distance.value
 	})
-		// if(!isInKm) {
-		// 	totalDistance /= 1.609344
-		// }
-
+	console.log(`total dist: ${totalDistance}`)
 	// Add ROI to start 
 	let ROIs = []
-	ROIs.append([route.legs[0].start_location.lat, route.legs[0].start_location.lng]);
+	ROIs.push([route.legs[0].start_location.lat, route.legs[0].start_location.lng]);
 	// Divide route by number of stops requested, subtract 1 for the start ROI
 	const distBetweenROI = totalDistance / (numStops - 1); 
-	
+	console.log(`dist between: ${distBetweenROI}`)
 	// Travel through route
 	let currDist = 0;
 	route.legs.forEach(leg => {
@@ -36,13 +35,15 @@ function generateROIs(route, numStops) {
 		} else {
 			// Go through trip steps until we're far enough from previous ROI to place another
 			leg.steps.forEach(step =>  {
+				console.log(step.start_location)
 				currDist += step.distance.value
+				console.log(currDist)
 				while(currDist >= distBetweenROI) {
 					// Keep adding ROIs in between current and next point if its far enough to fit multiple
 					console.log(currDist / 1000)
 					currDist -= distBetweenROI;
 					nextROI = calcPoint(step.start_location, step.end_location, (step.distance.value - currDist) / 1000);
-					ROIs.append(nextROI);
+					ROIs.push(nextROI);
 				}
 			});
 		}
@@ -67,18 +68,4 @@ function generateROIs(route, numStops) {
 	return ROIs
 }
 
-// Make route into doubly linked list and find the route's total distance
-function createRouteLinkedList(route) {
-	let head = new RouteNode();
-	let current = head;
-	let totalDistance = 0;
-	route.forEach(element => {
-		totalDistance += element.distance
-		current.next = new RouteNode(element.latitude, element.longitude, null, prev = current);
-		current = current.next;
-	});
-	head = head.next
-	return [head, totalDistance]
-}
-
-module.exports = findPOIs
+module.exports = {generateROIs, findPOIs}
