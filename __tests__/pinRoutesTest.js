@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const request = require('supertest');
 const app = require('../server');
 const { connectDB } = require('../db');
-const {testPin} = require('../assets/testObjects');
+const {testPin} = require('../assets/objects/testObjects');
 describe('Test pin routes', () => {
   let mongoServer;
   // Start mock DB
@@ -14,7 +14,8 @@ describe('Test pin routes', () => {
     process.env.NODE_ENV = 'test'; // Set the environment to 'test'
 
     await connectDB(mongoUri); // Connect to test db
-  });
+
+  }, 10000);
 
   // Stop mock DB
   afterAll(async () => {

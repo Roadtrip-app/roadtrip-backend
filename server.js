@@ -2,8 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-const {connectDB} = require('./db')
+const {connectDB} = require('./db');
 const pinRoutes = require('./routes/pinRoutes');
+const mapRoutes = require('./routes/mapRoutes');
 
 // Init app
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Set up routes
 app.use('/pins', pinRoutes);
+app.use('/map', mapRoutes);
 
 // Connect to production db if not testing
 if (process.env.NODE_ENV !== 'test') {
