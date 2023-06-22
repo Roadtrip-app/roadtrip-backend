@@ -14,7 +14,8 @@ describe('Test pin routes', () => {
     process.env.NODE_ENV = 'test'; // Set the environment to 'test'
 
     await connectDB(mongoUri); // Connect to test db
-  });
+
+  }, 10000);
 
   // Stop mock DB
   afterAll(async () => {
