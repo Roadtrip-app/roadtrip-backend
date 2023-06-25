@@ -1,16 +1,31 @@
+const axios = require('axios');
 const {dist, calcPoint} = require("./MapHelper");
 
 // Function that takes a route and finds locations to visit along that route
-function findPOIs(filter, route, numStops = null) {
-	const regionsOfInterest = generateROIs(route, numStops);
+async function findPOIs(regionsOfInterest, radius) {
 	let pointsOfInterest = []
-	regionsOfInterest.forEach(region => {
-		console.log(region)
-		// DB call
-		// API call
+	await Promise.all(regionsOfInterest.map(async (region, key) => {
+		const locations = await searchRadius(region[0], region[1], radius)
+		pointsOfInterest.push({key: key, location: locations[0]})
+	}));
+	pointsOfInterest.sort((a, b) => a.key > b.key ? 1 : -1)
+	return pointsOfInterest;
+}
 
-		// look for user-generated ones first, if none are rated higher than 3 then use API
-	})
+async function searchRadius(lat, lon, radius) {
+	let bestLocations;
+	// DB call 
+	const apiLocations = await axios.get(`https://api.opentripmap.com/0.1/en/places/radius?radius=${radius}&lon=${lon}&lat=${lat}&limit=10&apikey=${process.env.OPENTRIPMAP_KEY}`)
+	bestLocations = apiLocations.data.features.sort((a, b) => {
+		if(a.properties.rate > b.properties.rate){
+			return -1;
+		} else if(a.properties.rate < b.properties.rate) {
+			return 1;
+		} else if(a.properties.rate === b.properties.rate) {
+			a.properties.dist < b.properties.dist ? -1 : 1
+		}
+	})	  
+	return bestLocations
 }
 
 function generateROIs(apiResponse, numStops) {
@@ -24,7 +39,7 @@ function generateROIs(apiResponse, numStops) {
 	ROIs.push([route.legs[0].start_location.lat, route.legs[0].start_location.lng]);
 	// Divide route by number of stops requested, subtract 1 for the start ROI
 	const distBetweenROI = totalDistance / (numStops - 1); 
-	let distances = {idealDistance: distBetweenROI, actualDistances: []};
+	let distances = {totalDistance: totalDistance, idealDistance: distBetweenROI, actualDistances: []};
 
 	// Travel through route
 	let currDist = 0;
@@ -61,4 +76,4 @@ function generateROIs(apiResponse, numStops) {
 	return ROIs
 }
 
-module.exports = {generateROIs, findPOIs}
+module.exports = {generateROIs, findPOIs, searchRadius}
