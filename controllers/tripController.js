@@ -15,8 +15,7 @@ const planTrip = (async (req, res) => {
         const initialRoute = await generateRoute(req.query.origin, req.query.destination, null);
         const regionsOfInterest = await generateROIs(initialRoute.routes[0], req.query.stops);
         const routeStops = await findPOIs(regionsOfInterest, req.query.radius);
-        const finalRoute = await generateRoute(req.query.origin, req.query.destination, routeStops);
-        res.send(finalRoute)
+        res.send({origin: req.query.origin, destination: req.query.destination, locations: routeStops})
     } catch(err) {
         console.log(err)
     }
