@@ -1,36 +1,9 @@
 const axios = require('axios');
-const {dist, calcPoint} = require("./MapHelper");
+const {dist, calcPoint} = require("../utils/MapUtils");
 
-// Function that takes a route and finds locations to visit along that route
-async function findPOIs(regionsOfInterest, radius) {
-	let pointsOfInterest = []
-	await Promise.all(regionsOfInterest.map(async (region, key) => {
-		const locations = await searchRadius(region[0], region[1], radius)
-		pointsOfInterest.push({key: key, location: locations[0]})
-	}));
-	pointsOfInterest.sort((a, b) => a.key > b.key ? 1 : -1)
-	return pointsOfInterest;
-}
-
-async function searchRadius(lat, lon, radius) {
-	let bestLocations;
-	// DB call 
-	const apiLocations = await axios.get(`https://api.opentripmap.com/0.1/en/places/radius?radius=${radius}&lon=${lon}&lat=${lat}&limit=10&apikey=${process.env.OPENTRIPMAP_KEY}`)
-	bestLocations = apiLocations.data.features.sort((a, b) => {
-		if(a.properties.rate > b.properties.rate){
-			return -1;
-		} else if(a.properties.rate < b.properties.rate) {
-			return 1;
-		} else if(a.properties.rate === b.properties.rate) {
-			a.properties.dist < b.properties.dist ? -1 : 1
-		}
-	})	  
-	return bestLocations
-}
-
-function generateROIs(apiResponse, numStops) {
+// Takes a route and generates evenly spaced search locations along it
+async function generateROIs(route, numStops) {
 	let totalDistance = 0;
-	route = apiResponse.routes[0]
 	route.legs.forEach(leg => {
 		totalDistance += leg.distance.value
 	})
@@ -56,10 +29,9 @@ function generateROIs(apiResponse, numStops) {
 					nextROI = calcPoint(step.start_location, step.end_location, (step.distance.value - currDist) / 1000);
 
 					// Calculate the distance from the last ROI to the one we just calculated
-					// This is done by taking the distance from the previous ROI to the step.start_location (currDist - step.distance.value + distBetweenROI)
-					// and adding it to the distance from the step.start_location to the nextROI
 					const leftoverDistFromPrevROI = currDist - step.distance.value + distBetweenROI;
-					const resultDist = leftoverDistFromPrevROI + dist(step.start_location, {lat: nextROI[0], lng: nextROI[1]});
+					const distFromCurrentToROI = dist(step.start_location, {lat: nextROI[0], lng: nextROI[1]});
+					const resultDist = distFromCurrentToROI + leftoverDistFromPrevROI;
 
 					// Keep track of distances between ROIs as well as ROI coordinates
 					distances.actualDistances.push(resultDist)
@@ -74,6 +46,35 @@ function generateROIs(apiResponse, numStops) {
 	}
 
 	return ROIs
+}
+
+// Generates a list of the highest rated places in the locations provided
+async function findPOIs(searchAreas, radius) {
+	let pointsOfInterest = []
+	await Promise.all(searchAreas.map(async (region, key) => {
+		const location = await searchRadius(region[0], region[1], radius)
+		pointsOfInterest.push({key: key, location: location.properties, coordinates: location.geometry.coordinates})
+	}));
+	pointsOfInterest.sort((a, b) => a.key > b.key ? 1 : -1)
+	return pointsOfInterest;
+}
+
+async function searchRadius(lat, lon, radius) {
+	// DB call 
+	const apiLocations = await axios.get(`https://api.opentripmap.com/0.1/en/places/radius?radius=${radius}&lon=${lon}&lat=${lat}&limit=10&apikey=${process.env.OPENTRIPMAP_KEY}`);
+	let bestApiLocations = apiLocations.data.features.sort((a, b) => {
+		if(a.properties.rate > b.properties.rate){
+			return -1;
+		} else if(a.properties.rate < b.properties.rate) {
+			return 1;
+		} else if(a.properties.rate === b.properties.rate) {
+			a.properties.dist < b.properties.dist ? -1 : 1
+		}
+	})	  
+	let bestApiLocation = bestApiLocations[0]
+	const [locationLon, locationLat] = bestApiLocation.geometry.coordinates
+	bestApiLocation.geometry.coordinates = [locationLat, locationLon]
+	return bestApiLocation
 }
 
 module.exports = {generateROIs, findPOIs, searchRadius}

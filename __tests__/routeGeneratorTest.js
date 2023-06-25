@@ -1,5 +1,5 @@
 
-const {generateROIs, findPOIs} = require('../assets/helpers/LocationGenerator');
+const {generateROIs, findPOIs} = require('../services/POIService');
 const request = require('supertest');
 const app = require('../server');
 const {getRoute} = require('../assets/objects/setupTests')
@@ -8,7 +8,7 @@ let testRoute;
 describe('Test route generation', () => { 
 
 	beforeAll(async () => {
-		testRoute = await getRoute();
+		testRoute = await getRoute("", dest);
 	})
 
 	describe('Test ROI generation', () => {

@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const {connectDB} = require('./db');
 const pinRoutes = require('./routes/pinRoutes');
-const mapRoutes = require('./routes/mapRoutes');
+const mapRoutes = require('./routes/tripRoutes');
 
 // Init app
 const app = express();
