@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const {connectDB} = require('./db')
 const pinRoutes = require('./routes/pinRoutes');
-
+const placeRoutes = require('./routes/placeRoutes');
 // Init app
 const app = express();
 
@@ -15,6 +15,7 @@ app.use(express.json());
 
 // Set up routes
 app.use('/pins', pinRoutes);
+app.use('/places', placeRoutes);
 
 // Connect to production db if not testing
 if (process.env.NODE_ENV !== 'test') {
